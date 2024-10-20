@@ -81,6 +81,22 @@ async function listarUsuarios() {
                         visualizarUsuario(userId);
                     });
                 });
+
+                //Adiconando para atualizar após o evento 
+                document.querySelectorAll('.atualizar-usuario').forEach(button => {
+                    button.addEventListener('click', function() {
+                        atualizarUsuario();
+                    });
+                });
+
+                // Adicionei tbm o editar 
+                document.querySelectorAll('.editar-usuario').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const userId = this.getAttribute('data-id');
+                        editarUsuario(userId);
+                    });
+                });
+
             } else {
                 throw new Error('Usuário não encontrado, verifique o Id e tente novamente');
             }
