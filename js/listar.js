@@ -42,8 +42,12 @@ async function listarUsuarios() {
                         <td>${usuario.email}</td>
                         <td>${dataFormatada}</td>
                         <td>
-                            <button class="btn btn-info btn-sm visualizar-usuario" data-id="${usuario.id}">
+                            <button class="btn btn-info btn-sm viewUser" data-id="${usuario.id}">
                                 <i class="fas fa-eye"></i>
+                            </button>
+
+                            <button class="btn btn-info btn-sm editUser" data-id="${usuario.id}">
+                                <i class="fas fa-pencil"></i>
                             </button>
                             ${
                                 usuario.id != userIdLogado
@@ -68,15 +72,17 @@ async function listarUsuarios() {
                         }
                     });
                 });
-
-                document.querySelectorAll('.visualizar-usuario').forEach(button => {
+                
+                // Adiciona o evento de clique para visualizar o usuário
+                // Para cada botão com a classe 'viewUser', é adicionado um evento 'click'.
+                document.querySelectorAll('.viewUser').forEach(button => {
                     button.addEventListener('click', function() {
                         const userId = this.getAttribute('data-id');
                         visualizarUsuario(userId);
                     });
                 });
             } else {
-                throw new Error('Erro ao buscar os usuários');
+                throw new Error('Usuário não encontrado, verifique o Id e tente novamente');
             }
         } else {
             // Redireciona para o login se o token não existir
@@ -114,7 +120,7 @@ async function excluirUsuario(userId) {
     }
 }
 
-function visualizarUsuario(userId) {
+function visualizarUser(userId) {
     const token = localStorage.getItem('token');
 
     fetch(`http://localhost:8000/api/user/visualizar/${userId}`, {
@@ -125,8 +131,7 @@ function visualizarUsuario(userId) {
         },
     })
     .then(response => response.json())
-    .then(data => {        
-        // Preenche os dados do modal
+    .then(data => {                
         document.getElementById('usuarioNome').textContent = data.user.name;
         document.getElementById('usuarioEmail').textContent = data.user.email;
 
@@ -141,13 +146,73 @@ function visualizarUsuario(userId) {
             hour12: false
         });
 
-        // Abre o modal de visualização
+        // Mostra modal
         const visualizarModal = new bootstrap.Modal(document.getElementById('visualizarUsuarioModal'));
         visualizarModal.show();
     })
     .catch(error => {
         console.error('Erro ao visualizar o usuário:', error);
     });
+}
+
+function editarUser(userId) {
+    const token = localStorage.getItem('token');
+
+    fetch(`http://localhost:8000/api/user/visualizar/${userId}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {  
+
+        // Os dados serão preenchidos para o modal
+        document.getElementById('usuarioNomeForm').value = data.user.name;
+        document.getElementById('usuarioEmailForm').value = data.user.email;
+        document.getElementById('usuarioCodigoForm').value = data.user.id;
+
+        const editarModal = new bootstrap.Modal(document.getElementById('editarUsuarioModal'));
+        editarModal.show();
+    })
+    .catch(error => {
+        console.error('Erro ao editar o usuário:', error);
+    });
+}
+
+function atualizaUser() {
+    const token = localStorage.getItem('token');
+
+    const userId = document.getElementById('usuarioCodigoForm').value; 
+    const name = document.getElementById('usuarioNomeForm').value; 
+    const email = document.getElementById('usuarioEmailForm').value; 
+    const password = document.getElementById('usuarioSenhaForm').value; 
+    const password_confirmation = document.getElementById('usuarioConfirmaSenhaForm').value; 
+
+    fetch(`http://localhost:8000/api/user/atualizar/${userId}`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({name:name, email:email, password: password, password_confirmation:password_confirmation})
+    })
+    .then(response => response.json())
+    .then(data => { 
+        const mensagemSucesso = document.getElementById('mensagemSucesso');
+        mensagemSucesso.textContent = data.message
+        mensagemSucesso.classList.remove('d-none');       
+        // atualiza lista de usuários
+        listarUsuarios();
+    })
+    .catch(error => {
+        console.error('Erro ao editar o usuário:', error);
+        const mensagemErro = document.getElementById('mensagemErro');
+        mensagemErro.textContent = 'Erro ao atualizar o usuário';
+        mensagemErro.classList.remove('d-none');
+    });
+
 }
 
 // Chama a função para listar os usuários assim que a página for carregada
