@@ -42,11 +42,11 @@ async function listarUsuarios() {
                         <td>${usuario.email}</td>
                         <td>${dataFormatada}</td>
                         <td>
-                            <button class="btn btn-info btn-sm viewUser" data-id="${usuario.id}">
+                            <button class="btn btn-info btn-sm visualizarOUsuario" data-id="${usuario.id}">
                                 <i class="fas fa-eye"></i>
                             </button>
 
-                            <button class="btn btn-info btn-sm editUser" data-id="${usuario.id}">
+                            <button class="btn btn-info btn-sm editarOUsuario" data-id="${usuario.id}">
                                 <i class="fas fa-pencil"></i>
                             </button>
                             ${
@@ -72,25 +72,24 @@ async function listarUsuarios() {
                         }
                     });
                 });
-                
-                // Adiciona o evento de clique para visualizar o usuário
-                // Para cada botão com a classe 'viewUser', é adicionado um evento 'click'.
-                document.querySelectorAll('.viewUser').forEach(button => {
+              
+                document.querySelectorAll('.visualizarOUsuario').forEach(button => {
                     button.addEventListener('click', function() {
                         const userId = this.getAttribute('data-id');
                         visualizarUsuario(userId);
                     });
                 });
 
-                //Adiconando para atualizar após o evento 
+
+
+// Aqui vai ser adicionado a a parte tanto de atualizar quanto de editar da mesma forma que foi feito acima
                 document.querySelectorAll('.atualizar-usuario').forEach(button => {
                     button.addEventListener('click', function() {
-                        atualizarUsuario();
+                        atualizarUsuario();//atualiza pelo método que já foi criado
                     });
                 });
 
-                // Adicionei tbm o editar 
-                document.querySelectorAll('.editar-usuario').forEach(button => {
+                document.querySelectorAll('.editarOUsuario').forEach(button => {
                     button.addEventListener('click', function() {
                         const userId = this.getAttribute('data-id');
                         editarUsuario(userId);
@@ -135,8 +134,8 @@ async function excluirUsuario(userId) {
         alert('Erro ao excluir o usuário.');
     }
 }
-
-function visualizarUser(userId) {
+ 
+function visualizarUsuario(userId) {
     const token = localStorage.getItem('token');
 
     fetch(`http://localhost:8000/api/user/visualizar/${userId}`, {
@@ -171,7 +170,9 @@ function visualizarUser(userId) {
     });
 }
 
-function editarUser(userId) {
+
+//Adicionando a função de editar o usuário de acordo com o que foi criado acima 
+function editarUsuario(userId) {
     const token = localStorage.getItem('token');
 
     fetch(`http://localhost:8000/api/user/visualizar/${userId}`, {
@@ -183,8 +184,6 @@ function editarUser(userId) {
     })
     .then(response => response.json())
     .then(data => {  
-
-        // Os dados serão preenchidos para o modal
         document.getElementById('usuarioNomeForm').value = data.user.name;
         document.getElementById('usuarioEmailForm').value = data.user.email;
         document.getElementById('usuarioCodigoForm').value = data.user.id;
@@ -197,7 +196,9 @@ function editarUser(userId) {
     });
 }
 
-function atualizaUser() {
+
+//Criando a função de atualizar
+function atualizarUsuario() {
     const token = localStorage.getItem('token');
 
     const userId = document.getElementById('usuarioCodigoForm').value; 
@@ -219,7 +220,6 @@ function atualizaUser() {
         const mensagemSucesso = document.getElementById('mensagemSucesso');
         mensagemSucesso.textContent = data.message
         mensagemSucesso.classList.remove('d-none');       
-        // atualiza lista de usuários
         listarUsuarios();
     })
     .catch(error => {
